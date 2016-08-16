@@ -7,8 +7,8 @@ class Pattern {
 public:
     virtual void show(CRGB leds[NUM_STRIPS][NUM_LEDS]);
     virtual void enter(CRGB leds[NUM_STRIPS][NUM_LEDS]);
+    virtual String name();
 };
-
 
 enum Channel { rchannel, gchannel, bchannel } ;
 /**
@@ -18,11 +18,13 @@ enum Channel { rchannel, gchannel, bchannel } ;
  */
 class SimplePattern: public Pattern {
 private:
-    uint8_t brightness;
+    int brightness;
+    int increment;
     Channel channel;
 public:
     SimplePattern(Channel chan);
     void show(CRGB leds[NUM_STRIPS][NUM_LEDS]);
+    String name();
 };
 
 /**
@@ -33,15 +35,23 @@ class MultiCyclon: public Pattern {
 private:
     int head;
     bool go_upwards;
+    bool hue_upwards;
+    uint8_t hue;
+    CHSVPalette16 pallet;
     void fadeall(CRGB leds[NUM_LEDS]);
+    String _name;
 public:
-    MultiCyclon();
+    String name();
+    MultiCyclon(const TProgmemRGBPalette16& pal, String name);
     void show(CRGB leds[NUM_STRIPS][NUM_LEDS]);
 };
-
+/*
 class JellyFish: public Pattern {
 private:
+    int wave_location;
+    uint8_t wave_hue;
 public:
     JellyFish();
     void show(CRGB leds[NUM_STRIPS][NUM_LEDS]);
 };
+ */
