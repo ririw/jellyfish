@@ -91,7 +91,7 @@ public:
             fadeToBlackBy(leds[strip], NUM_LEDS, 20);
             byte dothue = 0;
             for (int i = 0; i < 8; i++) {
-                leds[strip][beatsin16(i + 7, 0, NUM_LEDS)] |= CHSV(dothue, 200, 255);
+                leds[strip][beatsin16(static_cast<uint8_t>(i + 7), 0, NUM_LEDS)] |= CHSV(dothue, 200, 255);
                 dothue += 32;
             }
         }

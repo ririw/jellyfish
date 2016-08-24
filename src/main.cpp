@@ -15,7 +15,7 @@ int num_cycles;
 CRGB leds[NUM_STRIPS][NUM_LEDS];
 
 void pick_pattern() {
-	current_pattern = (int)random(num_patterns);
+	current_pattern = static_cast<int>(random(num_patterns));
 	//current_pattern = (current_pattern + 1) % num_patterns;
 	pattern = patterns[current_pattern];
 	pattern->enter(leds);

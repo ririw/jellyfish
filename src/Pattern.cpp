@@ -27,9 +27,9 @@ SimplePattern::SimplePattern(Channel channel) {
 void SimplePattern::show(CRGB leds[NUM_STRIPS][NUM_LEDS]) {
     for (int strip = 0; strip < NUM_STRIPS; strip++) {
         for (int led = 0; led < NUM_LEDS; led++) {
-            leds[strip][led].r = (uint8_t)(channel == rchannel ? brightness : 0);
-            leds[strip][led].g = (uint8_t)(channel == gchannel ? brightness : 0);
-            leds[strip][led].b = (uint8_t)(channel == bchannel ? brightness : 0);
+            leds[strip][led].r = static_cast<uint8_t>(channel == rchannel ? brightness : 0);
+            leds[strip][led].g = static_cast<uint8_t>(channel == gchannel ? brightness : 0);
+            leds[strip][led].b = static_cast<uint8_t>(channel == bchannel ? brightness : 0);
         }
     }
     this->brightness += this->increment;
@@ -93,14 +93,17 @@ void JellyFish::show(CRGB leds[NUM_STRIPS][NUM_LEDS]) {
     if (random(0, 3) == 2) sparks[wave_center] = 255;                            // Push out a spark one in 5 times
     else sparks[wave_center] = 0;
     for (int spark_loc = NUM_LEDS - 1; spark_loc >= wave_center; spark_loc--) { // walk from the last LED to the center
-        uint8_t sub = random(0, 3) == 0 ? (uint8_t)3 : (uint8_t)0;
+        uint8_t sub = static_cast<uint8_t> (random(0, 3) == 0 ? 3 : 0);
         sparks[spark_loc + 1] = qsub8(sparks[spark_loc], sub);                  // and move the sparks towards NUM_LEDS
-        sparks[spark_loc + 2] = qsub8(sparks[spark_loc], sub * 10);             // and diffuse a little
+        sparks[spark_loc + 2] =
+                qsub8(sparks[spark_loc], static_cast<uint8_t>(sub * 10));       // and diffuse a little
     }                                                                           //  NUM_LEDS |>>>>>> center -------| 0
     for (int spark_loc = 2; spark_loc <= wave_center; spark_loc++) {            // walk from the first LEDS to the center
         uint8_t sub = random(0, 5) == 0 ? (uint8_t)1 : (uint8_t)0;
         sparks[spark_loc - 1] = qsub8(sparks[spark_loc], sub);                  // and move the sparks towards 0
-        sparks[spark_loc - 2] = qsub8(sparks[spark_loc], sub * 10);             // and diffuse a little
+        sparks[spark_loc - 2] =
+                qsub8(sparks[spark_loc], static_cast<uint8_t>(sub * 10));       // and diffuse a little
+
     }                                                                           //  NUM_LEDS |------ center <<<<<<<| 0
 
     for (int strip = 0; strip < NUM_STRIPS; strip++) {                         // Finally, just blit everything onto the
@@ -122,7 +125,7 @@ void Spiral::show(CRGB leds[NUM_STRIPS][NUM_LEDS]) {
         if (spiral_loc == 0 && step == -1) {
             spiral_loc = 15;
         } else {
-            spiral_loc = (spiral_loc + step) % (uint8_t)16;
+            spiral_loc = (spiral_loc + step) % static_cast<uint8_t>(16);
         }
     }
     innerloop = !innerloop;
