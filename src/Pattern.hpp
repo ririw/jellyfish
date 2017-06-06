@@ -97,3 +97,32 @@ public:
         }
     }
 };
+
+class Asparabreath: public Pattern {
+public:
+    Asparabreath() { _name = "Asparabreath"; }
+
+    void show(CRGB leds[NUM_STRIPS][NUM_LEDS]) {
+        double_t val = (exp(sin(millis()/2000.0*PI)) - 0.36787944)*108.0;
+        CHSV a = rgb2hsv_approximate(CRGB(0, 255, 0));
+        CHSV b = rgb2hsv_approximate(CRGB(128, 0, 128));
+        a.val = static_cast<uint8_t>(val / 1.5);
+        b.val = static_cast<uint8_t>(val / 2);
+        for (int strip = 0; strip < NUM_STRIPS; strip++) {
+            fill_gradient(leds[strip], NUM_LEDS, a, a, b);
+        }
+    }
+};
+
+class JustLights: public Pattern {
+public:
+    JustLights() { _name = "JustLights"; }
+
+    void show(CRGB leds[NUM_STRIPS][NUM_LEDS]) {
+        CHSV a = rgb2hsv_approximate(CRGB(128, 128, 128));
+        CHSV b = rgb2hsv_approximate(CRGB(64, 128, 64));
+        for (int strip = 0; strip < NUM_STRIPS; strip++) {
+            fill_gradient(leds[strip], NUM_LEDS, a, a, b);
+        }
+    }
+};

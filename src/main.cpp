@@ -5,29 +5,38 @@
 #include "EEPROM.h"
 #endif
 
+#include "kvec.h"
 #include "Pattern.hpp"
 
-const int num_patterns = 15;
 int current_pattern = 0;
 Pattern* pattern;
-Pattern* patterns[num_patterns];
+//Pattern* patterns[num_patterns];
+
+kvec_t(Pattern*) patterns;
+
 int num_cycles;
 CRGB leds[NUM_STRIPS][NUM_LEDS];
+bool just_lights;
+
 
 void pick_pattern() {
-	current_pattern = static_cast<int>(random(num_patterns));
-	//current_pattern = (current_pattern + 1) % num_patterns;
-	pattern = patterns[current_pattern];
-	pattern->enter(leds);
-	Serial.write("Running pattern: ");
-	Serial.print(pattern->name());
-	Serial.print("\n");
+	if (just_lights) {
+		return; // The pattern should already be JustLights, as it was initialized that way.
+	} else {
+		current_pattern = static_cast<int>(random(kv_size(patterns)));
+		pattern = kv_A(patterns, current_pattern);
+		pattern->enter(leds);
+		Serial.write("Running pattern: ");
+		Serial.print(pattern->name());
+		Serial.print("\n");
+	}
 }
 
 void re_seed() {
 	uint8_t s = EEPROM.read(0);
 	randomSeed(s);
 	EEPROM.write(0, s+(uint8_t)1);
+	just_lights = random(0, 2) == 0;
 }
 
 void setup() {
@@ -41,23 +50,25 @@ void setup() {
 	FastLED.addLeds<APA102,6 ,19,BGR>(leds[5], NUM_LEDS); // 7
 	FastLED.setBrightness(255);
 
-	patterns[0]  = new MultiCyclon(HeatColors_p,    String("HeatColors_p"));
-	patterns[1]  = new MultiCyclon(ForestColors_p,  String("ForestColors_p"));
-	patterns[2]  = new MultiCyclon(LavaColors_p,    String("LavaColors_p"));
-	patterns[3]  = new MultiCyclon(OceanColors_p,   String("OceanColors_p"));
-	patterns[4]  = new MultiCyclon(RainbowColors_p, String("RainbowColors_p"));
-	patterns[5]  = new MultiCyclon(PartyColors_p,   String("PartyColors_p"));
-	patterns[6]  = new JellyFish(HeatColors_p,    String("HeatColors_p"));
-	patterns[7]  = new JellyFish(ForestColors_p,  String("ForestColors_p"));
-	patterns[8]  = new JellyFish(LavaColors_p,    String("LavaColors_p"));
-	patterns[9]  = new JellyFish(OceanColors_p,   String("OceanColors_p"));
-	patterns[10] = new JellyFish(RainbowColors_p, String("RainbowColors_p"));
-	patterns[11] = new JellyFish(PartyColors_p,   String("PartyColors_p"));
-	patterns[12] = new Spiral(true);
-	patterns[13] = new Spiral(false);
-	patterns[14] = new Juggle();
+	kv_push(Pattern*, patterns, new MultiCyclon(HeatColors_p,    String("HeatColors_p")));
+	kv_push(Pattern*, patterns, new MultiCyclon(ForestColors_p,  String("ForestColors_p")));
+	kv_push(Pattern*, patterns, new MultiCyclon(LavaColors_p,    String("LavaColors_p")));
+	kv_push(Pattern*, patterns, new MultiCyclon(OceanColors_p,   String("OceanColors_p")));
+	kv_push(Pattern*, patterns, new MultiCyclon(RainbowColors_p, String("RainbowColors_p")));
+	kv_push(Pattern*, patterns, new MultiCyclon(PartyColors_p,   String("PartyColors_p")));
+	kv_push(Pattern*, patterns, new JellyFish(HeatColors_p,      String("HeatColors_p")));
+	kv_push(Pattern*, patterns, new JellyFish(ForestColors_p,    String("ForestColors_p")));
+	kv_push(Pattern*, patterns, new JellyFish(LavaColors_p,      String("LavaColors_p")));
+	kv_push(Pattern*, patterns, new JellyFish(OceanColors_p,     String("OceanColors_p")));
+	kv_push(Pattern*, patterns, new JellyFish(RainbowColors_p,   String("RainbowColors_p")));
+	kv_push(Pattern*, patterns, new Spiral(true));
+	kv_push(Pattern*, patterns, new Spiral(false));
+	kv_push(Pattern*, patterns, new Juggle());
+	kv_push(Pattern*, patterns, new Asparabreath());
 
-	pattern = patterns[14];
+	pattern = kv_A(patterns, 14);
+	if (just_lights)
+		pattern = new JustLights();
 	pattern->enter(leds);
 	num_cycles = 0;
 }
@@ -70,7 +81,7 @@ void loop() {
 		FastLED.show();
 
 		num_cycles += 1;
-		if (num_cycles > 2000) {
+		if (num_cycles > 3000) {
 			num_cycles = 0;
 			pick_pattern();
 		}
